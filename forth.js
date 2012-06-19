@@ -82,4 +82,12 @@ forth.standardWord = function(numArgs, func) {
 // Dictionary of words (as functions to execute)
 forth.dict = {};
 
+// Built-in words
 forth.dict['+'] = forth.standardWord(2, function(a, b) { return [a+b]; });
+forth.dict['-'] = forth.standardWord(2, function(a, b) { return [a-b]; });
+forth.dict['*'] = forth.standardWord(2, function(a, b) { return [a*b]; });
+forth.dict['/'] = forth.standardWord(2, function(a, b) {
+                                         if (b == 0)
+                                             throw 'division by zero';
+                                         return [a/b];
+                                     });

@@ -19,6 +19,9 @@ forth.test = function() {
         forth.execute(['+']);
         assertEqual(forth.stack.print(), '[5]');
 
+        forth.execute([3, 0, 1, '+', '/', '-']);
+        assertEqual(forth.stack.print(), '[2]');
+
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {
