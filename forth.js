@@ -98,3 +98,18 @@ forth.dict['.'] = forth.standardWord(1, function(a) {
                                      });
 
 forth.dict['print'] = forth.dict['.'];
+
+// Stack manipulation
+
+forth.dict['drop'] =
+    forth.standardWord(1, function(a) { return []; });
+forth.dict['swap'] =
+    forth.standardWord(2, function(a, b) { return [b, a]; });
+forth.dict['dup'] =
+    forth.standardWord(1, function(a) { return [a, a]; });
+forth.dict['over'] =
+    forth.standardWord(2, function(a, b) { return [a, b, a]; });
+forth.dict['rot'] =
+    forth.standardWord(1, function(a, b, c) { return [b, c, a]; });
+forth.dict['-rot'] =
+    forth.standardWord(1, function(a, b, c) { return [c, a, b]; });
