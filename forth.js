@@ -1,23 +1,62 @@
 
 forth = {};
 
-// Parse input, returning Forth words.
-forth.parse = function(s) {
-    var tokens = s.split(/\s+/);
-    var words = [];
+forth.Parser = function(str) {
+    this.str = str;
+    // we parse by chopping off characters from the start of 'input'
+    this.input = str;
+};
+forth.Parser.prototype = {
+    empty: function() {
+        return this.input.length == 0;
+    },
 
-    for (var i = 0; i < tokens.length; i++) {
-        var token = tokens[i];
-        if (token == '')
-            continue;
-        if (/^-?\d+$/.test(token))
-            words.push(parseInt(token));
-        else
-            // Unlike original Forth, we'll be case-insensitive
-            words.push(token.toLowerCase());
+    // Read all characters satisfying a given regexp.
+    readWhile: function(re) {
+        var n = 0;
+        while (n < this.input.length && re.test(this.input.charAt(n)))
+            n++;
+        var result = this.input.substr(0, n);
+        this.input = this.input.substr(n);
+        return result;
+    },
+
+    // Read a word (delimited by spaces)
+    readWord: function() {
+        // drop all spaces
+        this.readWhile(/\s/);
+
+        var result = this.readWhile(/\S/);
+
+        if (result == '')
+            return null;
+        return result;
+    },
+
+    readCode: function() {
+        var word = this.readWord();
+        if (word == null)
+            return null;
+        if (/^-?\d+$/.test(word))
+            return parseFloat(word);
+        // unlike original Forth, we'll be case-insensitive
+        return word.toLowerCase();
+    },
+
+    readAll: function() {
+        var codes = [];
+        var c;
+        while((c = this.readCode()) != null)
+            codes.push(c);
+        if (!this.empty())
+            throw 'parse error';
+        return codes;
     }
+};
 
-    return words;
+// Parse input, returning Forth words (for now).
+forth.parse = function(s) {
+    return new forth.Parser(s).readAll();
 };
 
 // Format a list of words
