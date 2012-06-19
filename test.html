@@ -5,10 +5,12 @@
   <script src="jquery.terminal-0.4.15.js"></script>
   <script src="forth.js"></script>
   <script src="forth-interface.js"></script>
+  <script src="forth-test.js"></script>
   <link rel="stylesheet" type="text/css" href="terminal.css" />
   <script>
     $(function() {
           forth.interface($('#term'));
+          forth.test();
           $('body').click(function() { forth.terminal.disable(); });
           $('#clear').click(function () { forth.terminal.clear(); });
     });
