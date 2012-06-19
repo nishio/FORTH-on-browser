@@ -19,3 +19,8 @@ forth.parse = function(s) {
 
     return words;
 };
+
+// Format a list of words
+forth.printWords = function(words) {
+    return words.join(' ');
+};

@@ -1,8 +1,20 @@
 <html>
 <head>
   <title>FORTH Interpreter</title>
+  <script src="jquery-1.7.2.min.js"></script>
+  <script src="jquery.terminal-0.4.15.js"></script>
   <script src="forth.js"></script>
+  <script src="forth-interface.js"></script>
+  <link rel="stylesheet" type="text/css" href="terminal.css" />
+  <script>
+    $(function() {
+          forth.interface($('#term'));
+          $('body').click(function() { forth.terminal.disable(); });
+          $('#clear').click(function () { forth.terminal.clear(); });
+    });
+  </script>
 </head>
+  <div id="term" style="width: 48%; height: 300px; float: left;"></div>
 <body>
 </body>
 </html>
