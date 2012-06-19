@@ -10,7 +10,7 @@ forth.parse = function(s) {
         var token = tokens[i];
         if (token == '')
             continue;
-        if (/^-?\d+/.test(token))
+        if (/^-?\d+$/.test(token))
             words.push(parseInt(token));
         else
             // Unlike original Forth, we'll be case-insensitive
