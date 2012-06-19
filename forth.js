@@ -89,5 +89,5 @@ forth.dict['*'] = forth.standardWord(2, function(a, b) { return [a*b]; });
 forth.dict['/'] = forth.standardWord(2, function(a, b) {
                                          if (b == 0)
                                              throw 'division by zero';
-                                         return [a/b];
+                                         return [Math.floor(a/b)];
                                      });
