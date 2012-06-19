@@ -16,6 +16,8 @@ forth.test = function() {
 
         forth.execute([2,3]);
         assertEqual(forth.stack.print(), '[2, 3]');
+        forth.execute(['+']);
+        assertEqual(forth.stack.print(), '[5]');
 
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');

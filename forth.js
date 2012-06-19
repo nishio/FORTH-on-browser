@@ -31,6 +31,8 @@ forth.execute = function(words) {
         var word = words[i];
         if (typeof word == 'number') // a number literal
             forth.stack.push(word);
+        else if (word in forth.dict)
+            forth.dict[word]();
         else
             throw 'unknown word: '+word;
     }
@@ -38,16 +40,46 @@ forth.execute = function(words) {
 
 forth.stack = {
     data: [],
+
     push: function (elt) { this.data.push(elt); },
+
+    pushList: function(list) {
+        for (var i = 0; i < list.length; i++)
+            this.data.push(list[i]);
+    },
+
     pop: function() {
         if (this.data.length == 0)
             throw 'empty stack';
         return this.data.pop();
     },
+
+    popList: function(n) {
+        if (this.data.length < n)
+            throw 'not enough elements on stack';
+        var result = this.data.slice(this.data.length-n);
+        this.data.splice(this.data.length-n);
+        return result;
+    },
+
     print: function() {
         return '['+this.data.join(', ')+']';
     },
+
     reset: function() {
-        this.data = [];
+        this.data.splice(0);
     }
 };
+
+forth.standardWord = function(numArgs, func) {
+    return function() {
+        var args = forth.stack.popList(numArgs);
+        var result = func.apply(null, args);
+        forth.stack.pushList(result);
+    };
+};
+
+// Dictionary of words (as functions to execute)
+forth.dict = {};
+
+forth.dict['+'] = forth.standardWord(2, function(a, b) { return [a+b]; });
