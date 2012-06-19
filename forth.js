@@ -110,6 +110,6 @@ forth.dict['dup'] =
 forth.dict['over'] =
     forth.standardWord(2, function(a, b) { return [a, b, a]; });
 forth.dict['rot'] =
-    forth.standardWord(1, function(a, b, c) { return [b, c, a]; });
+    forth.standardWord(3, function(a, b, c) { return [b, c, a]; });
 forth.dict['-rot'] =
-    forth.standardWord(1, function(a, b, c) { return [c, a, b]; });
+    forth.standardWord(3, function(a, b, c) { return [c, a, b]; });
