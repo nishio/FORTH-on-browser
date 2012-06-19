@@ -8,10 +8,10 @@ forth.interface = function(terminal) {
             try {
                 var words = forth.parse(str);
                 forth.execute(words);
-                forth.redrawStack();
             } catch(err) {
                 terminal.error(err);
             }
+            forth.redrawStack();
         },
         {
             greetings: "FORTH Interpreter. Type 'clear' to clear",
