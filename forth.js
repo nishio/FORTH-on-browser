@@ -58,7 +58,7 @@ forth.stack = {
         if (this.data.length < n)
             throw 'not enough elements on stack';
         var result = this.data.slice(this.data.length-n);
-        this.data.splice(this.data.length-n);
+        this.data.splice(this.data.length-n, n);
         return result;
     },
 
@@ -67,7 +67,7 @@ forth.stack = {
     },
 
     reset: function() {
-        this.data.splice(0);
+        this.data.splice(0, this.data.length);
     }
 };
 
