@@ -8,19 +8,23 @@ function assertEqual(e1, e2) {
     }
 };
 
+function assertExec(code, result) {
+    forth.execute(forth.parse(code));
+    assertEqual(forth.stack.print(), result);
+    forth.stack.reset();
+}
+
 forth.test = function() {
     forth.terminal.echo('Running tests...');
     try {
         assertEqual(forth.printWords(forth.parse(' A b c  d ')),
                           'a b c d');
 
-        forth.execute([2,3]);
-        assertEqual(forth.stack.print(), '[2, 3]');
-        forth.execute(['+']);
-        assertEqual(forth.stack.print(), '[5]');
+        assertExec('2 3', '[2, 3]');
 
-        forth.execute([3, 0, 1, '+', '/', '-']);
-        assertEqual(forth.stack.print(), '[2]');
+        assertExec('2 3 +', '[5]');
+
+        assertExec('5 3 0 1 + / -', '[2]');
 
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
