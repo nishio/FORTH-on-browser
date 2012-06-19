@@ -91,3 +91,10 @@ forth.dict['/'] = forth.standardWord(2, function(a, b) {
                                              throw 'division by zero';
                                          return [Math.floor(a/b)];
                                      });
+
+forth.dict['.'] = forth.standardWord(1, function(a) {
+                                         forth.terminal.echo(a);
+                                         return [];
+                                     });
+
+forth.dict['print'] = forth.dict['.'];
