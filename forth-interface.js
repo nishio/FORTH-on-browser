@@ -7,7 +7,7 @@ forth.interface = function(terminal) {
         function(str, terminal) {
             try {
                 var words = forth.parse(str);
-                terminal.echo(forth.printWords(words));
+                forth.execute(words);
             } catch(err) {
                 terminal.error(err);
             }

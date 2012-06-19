@@ -13,6 +13,11 @@ forth.test = function() {
     try {
         assertEqual(forth.printWords(forth.parse(' A b c  d ')),
                           'a b c d');
+
+        forth.execute([2,3]);
+        assertEqual(forth.stack.print(), '[2, 3]');
+
+        forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {
         forth.terminal.error('test: '+err);
