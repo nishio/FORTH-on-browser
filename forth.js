@@ -64,7 +64,7 @@ forth.runToken = function(token) {
     if (typeof token == 'number') // a number literal
         forth.stack.push(token);
     else if (token in forth.dict)
-        forth.dict[token]();
+        forth.dict[token].run();
     else
         throw 'unknown word: '+token;
 };
@@ -73,7 +73,7 @@ forth.compileToken = function(token, code) {
     if (typeof token == 'number')
         code.push({op: 'number', value: token});
     else if (token in forth.dict)
-        code.push({op: 'call', value: forth.dict[token]});
+        forth.dict[token].compile(code);
     else
         throw 'unknown word: '+token;
 };
@@ -87,7 +87,7 @@ forth.runCode = function(code) {
             forth.stack.push(cmd.value);
             break;
         case 'call':
-            cmd.value();
+            cmd.value.run();
             break;
         default:
             throw 'bug: bad opcode';
@@ -138,19 +138,45 @@ forth.stack = {
     }
 };
 
-forth.standardWord = function(types, func) {
-    return function() {
-        var args = forth.stack.popList(types.length);
+// Words
+// Word is an object with the following properties:
+//  run() - run immediately
+//  compile(code) - add yourself to the code
 
-        for (var i = 0; i < types.length; i++) {
-            var type = types[i];
+forth.genericWord = {
+    compile: function(code) {
+        code.push({op: 'call', value: this});
+    }
+};
+
+forth.StandardWord = function(types, func) {
+    this.types = types;
+    this.func = func;
+};
+forth.StandardWord.prototype = {
+    run: function() {
+        var args = forth.stack.popList(this.types.length);
+
+        for (var i = 0; i < this.types.length; i++) {
+            var type = this.types[i];
             if (type != 'any')
                 forth.checkType(args[i], type);
         }
 
-        var result = func.apply(null, args);
+        var result = this.func.apply(null, args);
         forth.stack.pushList(result);
-    };
+    },
+    compile: forth.genericWord.compile
+};
+
+forth.CodeWord = function(code) {
+    this.code = code;
+};
+forth.CodeWord.prototype = {
+    run: function() {
+        forth.runCode(this.code);
+    },
+    compile: forth.genericWord.compile
 };
 
 forth.checkType = function(val, type) {
@@ -161,41 +187,44 @@ forth.checkType = function(val, type) {
 // Dictionary of words (as functions to execute)
 forth.dict = {};
 
-forth.dict[':'] = function() {
-    var name = forth.source.readToken();
-    if (typeof name != 'string')
-        throw 'a name expected';
+forth.dict[':'] = {
+    run: function() {
+        var name = forth.source.readToken();
+        if (typeof name != 'string')
+            throw 'a name expected';
 
-    var code = [];
-    var token;
-    while ((token = forth.source.readToken()) != ';') {
-        if (token == null)
-            throw '; expected';
-        forth.compileToken(token, code);
+        var code = [];
+        var token;
+        while ((token = forth.source.readToken()) != ';') {
+            if (token == null)
+                throw '; expected';
+            forth.compileToken(token, code);
+        }
+
+        var word = new forth.CodeWord(code);
+        forth.dict[name] = word;
+    },
+
+    compile: function() {
+        throw ': unavailable in compile mode';
     }
-
-    var func = function() {
-        forth.runCode(code);
-    };
-    forth.dict[name] = func;
-    //forth.terminal.echo('defined '+name);
 };
 
 // Built-in words
 
-forth.dict['+'] = forth.standardWord(
+forth.dict['+'] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a+b]; });
 
-forth.dict['-'] = forth.standardWord(
+forth.dict['-'] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a-b]; });
 
-forth.dict['*'] = forth.standardWord(
+forth.dict['*'] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a*b]; });
 
-forth.dict['/'] = forth.standardWord(
+forth.dict['/'] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) {
         if (b == 0)
@@ -203,7 +232,7 @@ forth.dict['/'] = forth.standardWord(
         return [Math.floor(a/b)];
     });
 
-forth.dict['.'] = forth.standardWord(
+forth.dict['.'] = new forth.StandardWord(
     ['any'],
     function(a) {
         forth.terminal.echo(a);
@@ -215,62 +244,73 @@ forth.dict['print'] = forth.dict['.'];
 // Stack manipulation
 
 forth.dict['drop'] =
-    forth.standardWord(['any'],
-                       function(a) { return []; });
+    new forth.StandardWord(
+        ['any'],
+        function(a) { return []; });
+
 forth.dict['swap'] =
-    forth.standardWord(['any', 'any'],
-                       function(a, b) { return [b, a]; });
+    new forth.StandardWord(
+        ['any', 'any'],
+        function(a, b) { return [b, a]; });
+
 forth.dict['dup'] =
-    forth.standardWord(['any'],
-                       function(a) { return [a, a]; });
+    new forth.StandardWord(
+        ['any'],
+        function(a) { return [a, a]; });
+
 forth.dict['over'] =
-    forth.standardWord(['any', 'any'],
-                       function(a, b) { return [a, b, a]; });
+    new forth.StandardWord(
+        ['any', 'any'],
+        function(a, b) { return [a, b, a]; });
+
 forth.dict['rot'] =
-    forth.standardWord(['any', 'any', 'any'],
-                       function(a, b, c) { return [b, c, a]; });
+    new forth.StandardWord(
+        ['any', 'any', 'any'],
+        function(a, b, c) { return [b, c, a]; });
+
 forth.dict['-rot'] =
-    forth.standardWord(['any', 'any', 'any'],
-                       function(a, b, c) { return [c, a, b]; });
+    new forth.StandardWord(
+        ['any', 'any', 'any'],
+        function(a, b, c) { return [c, a, b]; });
 
 // True and false are standard words, not literals
-forth.dict['true'] = forth.standardWord([], function() { return [true]; });
-forth.dict['false'] = forth.standardWord([], function() { return [false]; });
+forth.dict['true'] = new forth.StandardWord([], function() { return [true]; });
+forth.dict['false'] = new forth.StandardWord([], function() { return [false]; });
 
-forth.dict['and'] = forth.standardWord(
+forth.dict['and'] = new forth.StandardWord(
     ['boolean', 'boolean'],
     function(a, b) { return [a && b]; });
 
-forth.dict['or'] = forth.standardWord(
+forth.dict['or'] = new forth.StandardWord(
     ['boolean', 'boolean'],
     function(a, b) { return [a || b]; });
 
-forth.dict['not'] = forth.standardWord(
+forth.dict['not'] = new forth.StandardWord(
     ['boolean'],
     function(a) { return [!a]; });
 
 // comparison
 
-forth.dict['='] = forth.standardWord(
+forth.dict['='] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a == b]; });
 
-forth.dict['<>'] = forth.standardWord(
+forth.dict['<>'] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a != b]; });
 
-forth.dict['<'] = forth.standardWord(
+forth.dict['<'] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a < b]; });
 
-forth.dict['>'] = forth.standardWord(
+forth.dict['>'] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a > b]; });
 
-forth.dict['<='] = forth.standardWord(
+forth.dict['<='] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a <= b]; });
 
-forth.dict['>='] = forth.standardWord(
+forth.dict['>='] = new forth.StandardWord(
     ['number', 'number'],
     function(a, b) { return [a >= b]; });
