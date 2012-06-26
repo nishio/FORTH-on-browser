@@ -32,6 +32,9 @@ forth.test = function() {
         forth.assertExec('1 2 3 -rot', '[3, 1, 2]');
         forth.assertExec('1 2 over', '[1, 2, 1]');
 
+        forth.assertExec('true false and', '[false]');
+        forth.assertExec('true false true and or not', '[false]');
+
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {

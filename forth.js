@@ -184,3 +184,19 @@ forth.dict['rot'] =
 forth.dict['-rot'] =
     forth.standardWord(['any', 'any', 'any'],
                        function(a, b, c) { return [c, a, b]; });
+
+// True and false are standard words, not literals
+forth.dict['true'] = forth.standardWord([], function() { return [true]; });
+forth.dict['false'] = forth.standardWord([], function() { return [false]; });
+
+forth.dict['and'] = forth.standardWord(
+    ['boolean', 'boolean'],
+    function(a, b) { return [a && b]; });
+
+forth.dict['or'] = forth.standardWord(
+    ['boolean', 'boolean'],
+    function(a, b) { return [a || b]; });
+
+forth.dict['not'] = forth.standardWord(
+    ['boolean'],
+    function(a) { return [!a]; });
