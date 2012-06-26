@@ -304,7 +304,6 @@ forth.dict['('] = {
         if (forth.source.empty())
             throw ') expected';
         forth.source.readChar();
-        console.log(forth.source.input);
     },
     run: function() { this.readComment(); },
     compile: function(code) { this.readComment(); }
