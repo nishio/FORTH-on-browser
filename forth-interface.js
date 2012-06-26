@@ -20,6 +20,22 @@ forth.interface = function(terminal, stack) {
     forth.stackElt = $(stack);
 };
 
+
+// Clicking 'button' will load 'source' to the interpreter
+forth.sourceLoader = function(source, button) {
+    button.click(
+        function() {
+            forth.terminal.echo('Loading source...');
+            try {
+                forth.runString(source.val());
+                forth.terminal.echo('Source loaded');
+            } catch(err) {
+                console.log(err);
+                forth.terminal.error(err);
+            }
+        });
+};
+
 forth.redrawStack = function() {
     forth.stackElt.empty();
     for (var i = 0; i < forth.stack.data.length; i++) {
