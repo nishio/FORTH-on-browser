@@ -10,7 +10,6 @@
   <script>
     $(function() {
           forth.interface($('#term'), $('#stack'));
-          forth.sourceLoader($('#source'), $('#load'));
           forth.test();
           $('body').click(function() { forth.terminal.disable(); });
           $('#clear').click(function () { forth.terminal.clear(); });
@@ -27,25 +26,10 @@
     }
   </style>
 </head>
-  <!-- Interpreter and source -->
-  <div>
-    <div id="term" style="width: 48%; height: 300px; float: left;"></div>
-    <div style="width: 48%; float: right;">
-      <textarea id="source" style="width: 100%; height: 300px;">
-( Type Forth code here )
-
-: square ( n -- n ) dup * ;
-</textarea>
-      <input type="button" id="clear" value="Clear terminal" />
-      <input type="button" id="load" value="Load source" />
-    </div>
-  </div>
-  <!-- Debugger -->
-  <div>
-     <div style="width: 100px; height: 300px; float:left; margin-left:1em;">
-       <b>Stack</b><br/>
-       <div id="stack"></div>
-     </div>
+  <div id="term" style="width: 48%; height: 300px; float: left;"></div>
+  <div style="width: 100px; height: 300px; float:left; margin-left:1em;">
+    <b>Stack</b><br/>
+    <div id="stack"></div>
   </div>
 <body>
 </body>

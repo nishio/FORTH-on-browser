@@ -107,6 +107,10 @@ forth.runCode = function(code) {
                 ip++;
             break;
         }
+        case 'recurse':
+            forth.callStack[forth.callStack.length-1].run();
+            ip++;
+            break;
         default:
             throw 'bug: bad opcode '+cmd.op;
         }
@@ -115,11 +119,17 @@ forth.runCode = function(code) {
 
 forth.runString = function(s) {
     forth.source = new forth.Parser(s);
-    for (;;) {
-        var token = forth.source.readToken();
-        if (token == null)
-            break;
-        forth.runToken(token);
+    forth.callStack = [];
+    try {
+        for (;;) {
+            var token = forth.source.readToken();
+            if (token == null)
+                break;
+            forth.runToken(token);
+        }
+    } catch (err) {
+        forth.callStack = [];
+        throw err;
     }
 };
 
@@ -173,6 +183,8 @@ forth.StandardWord = function(types, func) {
 };
 forth.StandardWord.prototype = {
     run: function() {
+        forth.callStack.push(this);
+
         var args = forth.stack.popList(this.types.length);
 
         for (var i = 0; i < this.types.length; i++) {
@@ -183,6 +195,8 @@ forth.StandardWord.prototype = {
 
         var result = this.func.apply(null, args);
         forth.stack.pushList(result);
+
+        forth.callStack.pop();
     },
     compile: forth.genericWord.compile
 };
@@ -192,7 +206,9 @@ forth.CodeWord = function(code) {
 };
 forth.CodeWord.prototype = {
     run: function() {
+        forth.callStack.push(this);
         forth.runCode(this.code);
+        forth.callStack.pop();
     },
     compile: forth.genericWord.compile
 };
@@ -224,6 +240,10 @@ forth.dict[':'] = {
         var name = forth.source.readToken();
         if (typeof name != 'string')
             throw 'a name expected';
+
+        // invoking the name inside a function will compile
+        // to a 'recurse'
+        forth.dict[name] = forth.dict['recurse'];
 
         var code = [];
         var token;
@@ -280,6 +300,15 @@ forth.dict['('] = {
     },
     run: function() { this.readComment(); },
     compile: function(code) { this.readComment(); }
+};
+
+forth.dict['recurse'] = {
+    run: function() {
+        throw '"recurse" unavailable in run mode';
+    },
+    compile: function(code) {
+        code.push({op: 'recurse'});
+    }
 };
 
 // Built-in words
