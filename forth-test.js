@@ -9,7 +9,7 @@ forth.assertEqual = function(e1, e2) {
 };
 
 forth.assertExec = function(code, result) {
-    forth.execute(forth.parse(code));
+    forth.runString(code);
     forth.assertEqual(forth.stack.print(), result);
     forth.stack.reset();
 };

@@ -6,8 +6,7 @@ forth.interface = function(terminal) {
     terminal.terminal(
         function(str, terminal, stack) {
             try {
-                var words = forth.parse(str);
-                forth.execute(words);
+                forth.runString(str);
             } catch(err) {
                 terminal.error(err);
             }

@@ -30,23 +30,18 @@ forth.Parser.prototype = {
 
         if (result == '')
             return null;
-        return result;
-    },
 
-    readCode: function() {
-        var word = this.readWord();
-        if (word == null)
-            return null;
-        if (/^-?\d+$/.test(word))
-            return parseFloat(word);
+        if (/^-?\d+$/.test(result))
+            return parseFloat(result);
+
         // unlike original Forth, we'll be case-insensitive
-        return word.toLowerCase();
+        return result.toLowerCase();
     },
 
     readAll: function() {
         var codes = [];
         var c;
-        while((c = this.readCode()) != null)
+        while((c = this.readWord()) != null)
             codes.push(c);
         if (!this.empty())
             throw 'parse error';
@@ -54,7 +49,7 @@ forth.Parser.prototype = {
     }
 };
 
-// Parse input, returning Forth words (for now).
+// Parse input, returning Forth words
 forth.parse = function(s) {
     return new forth.Parser(s).readAll();
 };
@@ -64,16 +59,23 @@ forth.printWords = function(words) {
     return words.join(' ');
 };
 
-// Execute a list of words
-forth.execute = function(words) {
-    for (var i = 0; i < words.length; i++) {
-        var word = words[i];
-        if (typeof word == 'number') // a number literal
-            forth.stack.push(word);
-        else if (word in forth.dict)
-            forth.dict[word]();
-        else
-            throw 'unknown word: '+word;
+// Execute a word
+forth.runWord = function(word) {
+    if (typeof word == 'number') // a number literal
+        forth.stack.push(word);
+    else if (word in forth.dict)
+        forth.dict[word]();
+    else
+        throw 'unknown word: '+word;
+};
+
+forth.runString = function(s) {
+    forth.code = new forth.Parser(s);
+    for (;;) {
+        var word = forth.code.readWord();
+        if (word == null)
+            break;
+        forth.runWord(word);
     }
 };
 
