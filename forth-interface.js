@@ -2,9 +2,9 @@
 // Forth interface
 
 // Install Forth interface. terminal, stack are jQuery objects
-forth.interface = function(terminal) {
+forth.interface = function(terminal, stack) {
     terminal.terminal(
-        function(str, terminal, stack) {
+        function(str, terminal) {
             try {
                 forth.runString(str);
             } catch(err) {
