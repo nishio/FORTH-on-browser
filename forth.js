@@ -254,6 +254,18 @@ forth.dict['if'] = {
     }
 };
 
+forth.dict['repeat'] = {
+    run: function() {
+        throw '"repeat" unavailable in run mode';
+    },
+    compile: function(code) {
+        var dest = code.length;
+        forth.compileUntil(['until'], code);
+        code.push({op: 'goto-on-false', value: dest});
+    }
+};
+
+
 // Built-in words
 
 forth.dict['+'] = new forth.StandardWord(
