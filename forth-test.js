@@ -64,6 +64,10 @@ forth.test = function() {
         forth.assertExec(': a 1 - dup 0 > if recurse then ; 10 a', '[0]');
         delete forth.dict['a'];
 
+        forth.assertExec('variable x 2 x ! x @', '[2]');
+        delete forth.dict['x'];
+        delete forth.variables['x'];
+
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {

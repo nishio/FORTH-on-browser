@@ -146,6 +146,33 @@ forth.dict['recurse'] = {
     }
 };
 
+forth.dict['variable'] = {
+    name: 'variable',
+    run: function() {
+        var name = forth.source.readToken();
+        if (typeof name != 'string')
+            throw 'a name expected';
+
+        forth.variables[name] = 0;
+        forth.dict[name] = new forth.AddressWord(name);
+    },
+    compile: function(code) {
+        throw 'variables have to be defined in run mode';
+    }
+};
+
+forth.AddressWord = function(name) {
+    this.name = name;
+};
+forth.AddressWord.prototype = {
+    run: function() {
+        forth.stack.push(this.name);
+    },
+    compile: function(code) {
+        code.push({op: 'addr', value: this.name});
+    }
+};
+
 // Built-in words
 
 forth.dict['+'] = new forth.StandardWord(
@@ -270,3 +297,27 @@ forth.dict['>='] = new forth.StandardWord(
     '>=',
     ['number', 'number'],
     function(a, b) { return [a >= b]; });
+
+// Variable store and fetch
+
+forth.dict['!'] = new forth.StandardWord(
+    '!',
+    ['any', 'string'],
+    function (val, name) {
+        if (!(name in forth.variables))
+            throw 'undefined variable: '+name;
+        forth.variables[name] = val;
+        return [];
+    });
+forth.dict['store'] = forth.dict['!'];
+
+forth.dict['@'] = new forth.StandardWord(
+    '@',
+    ['string'],
+    function (name) {
+        if (!(name in forth.variables))
+            throw 'undefined variable: '+name;
+        return [forth.variables[name]];
+    });
+forth.dict['fetch'] = forth.dict['@'];
+

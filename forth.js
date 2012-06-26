@@ -88,6 +88,7 @@ forth.runCode = function(code) {
         var cmd = code[ip];
         switch (cmd.op) {
         case 'number':
+        case 'addr': // variable 'address', a string
             forth.stack.push(cmd.value);
             ip++;
             break;
