@@ -21,6 +21,10 @@ forth.Parser.prototype = {
         return result;
     },
 
+    readChar: function() {
+        this.input = this.input.substr(1);
+    },
+
     // Read a token (delimited by spaces)
     readToken: function() {
         // drop all spaces
@@ -265,6 +269,18 @@ forth.dict['repeat'] = {
     }
 };
 
+forth.dict['('] = {
+    readComment: function() {
+        // Read until the ')' character
+        forth.source.readWhile(/[^)]/);
+        if (forth.source.empty())
+            throw ') expected';
+        forth.source.readChar();
+        console.log(forth.source.input);
+    },
+    run: function() { this.readComment(); },
+    compile: function(code) { this.readComment(); }
+};
 
 // Built-in words
 

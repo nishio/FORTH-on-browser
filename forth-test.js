@@ -55,6 +55,10 @@ forth.test = function() {
         forth.assertExec(': a 2 repeat 2 * dup 100 > until ; a', '[128]');
         delete forth.dict['a'];
 
+        forth.assertExec('1 2 ( + ) -', '[-1]');
+        forth.assertExec(': a 1 2 ( + ) - ; a', '[-1]');
+        delete forth.dict['a'];
+
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {
