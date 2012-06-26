@@ -110,45 +110,77 @@ forth.stack = {
     }
 };
 
-forth.standardWord = function(numArgs, func) {
+forth.standardWord = function(types, func) {
     return function() {
-        var args = forth.stack.popList(numArgs);
+        var args = forth.stack.popList(types.length);
+
+        for (var i = 0; i < types.length; i++) {
+            var type = types[i];
+            if (type != 'any')
+                forth.checkType(args[i], type);
+        }
+
         var result = func.apply(null, args);
         forth.stack.pushList(result);
     };
+};
+
+forth.checkType = function(val, type) {
+    if (typeof val != type)
+        throw 'expected '+type;
 };
 
 // Dictionary of words (as functions to execute)
 forth.dict = {};
 
 // Built-in words
-forth.dict['+'] = forth.standardWord(2, function(a, b) { return [a+b]; });
-forth.dict['-'] = forth.standardWord(2, function(a, b) { return [a-b]; });
-forth.dict['*'] = forth.standardWord(2, function(a, b) { return [a*b]; });
-forth.dict['/'] = forth.standardWord(2, function(a, b) {
-                                         if (b == 0)
-                                             throw 'division by zero';
-                                         return [Math.floor(a/b)];
-                                     });
 
-forth.dict['.'] = forth.standardWord(1, function(a) {
-                                         forth.terminal.echo(a);
-                                         return [];
-                                     });
+forth.dict['+'] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a+b]; });
+
+forth.dict['-'] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a-b]; });
+
+forth.dict['*'] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a*b]; });
+
+forth.dict['/'] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) {
+        if (b == 0)
+            throw 'division by zero';
+        return [Math.floor(a/b)];
+    });
+
+forth.dict['.'] = forth.standardWord(
+    ['any'],
+    function(a) {
+        forth.terminal.echo(a);
+        return [];
+    });
 
 forth.dict['print'] = forth.dict['.'];
 
 // Stack manipulation
 
 forth.dict['drop'] =
-    forth.standardWord(1, function(a) { return []; });
+    forth.standardWord(['any'],
+                       function(a) { return []; });
 forth.dict['swap'] =
-    forth.standardWord(2, function(a, b) { return [b, a]; });
+    forth.standardWord(['any', 'any'],
+                       function(a, b) { return [b, a]; });
 forth.dict['dup'] =
-    forth.standardWord(1, function(a) { return [a, a]; });
+    forth.standardWord(['any'],
+                       function(a) { return [a, a]; });
 forth.dict['over'] =
-    forth.standardWord(2, function(a, b) { return [a, b, a]; });
+    forth.standardWord(['any', 'any'],
+                       function(a, b) { return [a, b, a]; });
 forth.dict['rot'] =
-    forth.standardWord(3, function(a, b, c) { return [b, c, a]; });
+    forth.standardWord(['any', 'any', 'any'],
+                       function(a, b, c) { return [b, c, a]; });
 forth.dict['-rot'] =
-    forth.standardWord(3, function(a, b, c) { return [c, a, b]; });
+    forth.standardWord(['any', 'any', 'any'],
+                       function(a, b, c) { return [c, a, b]; });
