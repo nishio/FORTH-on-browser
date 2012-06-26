@@ -200,3 +200,29 @@ forth.dict['or'] = forth.standardWord(
 forth.dict['not'] = forth.standardWord(
     ['boolean'],
     function(a) { return [!a]; });
+
+// comparison
+
+forth.dict['='] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a == b]; });
+
+forth.dict['<>'] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a != b]; });
+
+forth.dict['<'] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a < b]; });
+
+forth.dict['>'] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a > b]; });
+
+forth.dict['<='] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a <= b]; });
+
+forth.dict['>='] = forth.standardWord(
+    ['number', 'number'],
+    function(a, b) { return [a >= b]; });

@@ -12,7 +12,7 @@ forth.assertExec = function(code, result) {
     forth.execute(forth.parse(code));
     forth.assertEqual(forth.stack.print(), result);
     forth.stack.reset();
-}
+};
 
 forth.test = function() {
     forth.terminal.echo('Running tests...');
@@ -34,6 +34,11 @@ forth.test = function() {
 
         forth.assertExec('true false and', '[false]');
         forth.assertExec('true false true and or not', '[false]');
+
+        forth.assertExec('2 2 = 2 2 <= 2 2 >= 2 2 <>', '[true, true, true, false]');
+        forth.assertExec('2 3 = 2 3 <= 2 3 >= 2 3 <>', '[false, true, false, true]');
+        forth.assertExec('2 2 < 2 2 >', '[false, false]');
+        forth.assertExec('2 3 < 2 3 >', '[true, false]');
 
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
