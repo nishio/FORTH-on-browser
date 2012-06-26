@@ -69,10 +69,36 @@ forth.runWord = function(word) {
         throw 'unknown word: '+word;
 };
 
+forth.compileWord = function(word, code) {
+    if (typeof word == 'number')
+        code.push({op: 'number', value: word});
+    else if (word in forth.dict)
+        code.push({op: 'call', value: forth.dict[word]});
+    else
+        throw 'unknown word: '+word;
+};
+
+forth.runCode = function(code) {
+    for (var ip = 0; ip < code.length; ip++) {
+        var cmd = code[ip];
+        console.log(cmd);
+        switch (cmd.op) {
+        case 'number':
+            forth.stack.push(cmd.value);
+            break;
+        case 'call':
+            cmd.value();
+            break;
+        default:
+            throw 'bug: bad opcode';
+        }
+    }
+};
+
 forth.runString = function(s) {
-    forth.code = new forth.Parser(s);
+    forth.source = new forth.Parser(s);
     for (;;) {
-        var word = forth.code.readWord();
+        var word = forth.source.readWord();
         if (word == null)
             break;
         forth.runWord(word);
@@ -134,6 +160,26 @@ forth.checkType = function(val, type) {
 
 // Dictionary of words (as functions to execute)
 forth.dict = {};
+
+forth.dict[':'] = function() {
+    var name = forth.source.readWord();
+    if (typeof name != 'string')
+        throw 'a name expected';
+
+    var code = [];
+    var word;
+    while ((word = forth.source.readWord()) != ';') {
+        if (word == null)
+            throw '; expected';
+        forth.compileWord(word, code);
+    }
+
+    var func = function() {
+        forth.runCode(code);
+    };
+    forth.dict[name] = func;
+    //forth.terminal.echo('defined '+name);
+};
 
 // Built-in words
 

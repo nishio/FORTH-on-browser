@@ -40,6 +40,10 @@ forth.test = function() {
         forth.assertExec('2 2 < 2 2 >', '[false, false]');
         forth.assertExec('2 3 < 2 3 >', '[true, false]');
 
+        forth.assertExec(': a 2 2 + ;', '[]');
+        forth.assertExec('a', '[4]');
+        delete forth.dict['a'];
+
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {
