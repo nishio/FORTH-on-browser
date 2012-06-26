@@ -44,6 +44,14 @@ forth.test = function() {
         forth.assertExec('a', '[4]');
         delete forth.dict['a'];
 
+        forth.assertExec(': a true if 1 else 0 then ; a', '[1]');
+        forth.assertExec(': a false if 1 else 0 then ; a', '[0]');
+        delete forth.dict['a'];
+
+        forth.assertExec(': a true if 1 then ; a', '[1]');
+        forth.assertExec(': a false if 1 then ; a', '[]');
+        delete forth.dict['a'];
+
         forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {

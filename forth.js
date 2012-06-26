@@ -79,18 +79,32 @@ forth.compileToken = function(token, code) {
 };
 
 forth.runCode = function(code) {
-    for (var ip = 0; ip < code.length; ip++) {
+    var ip = 0;
+    while (ip < code.length) {
         var cmd = code[ip];
-        console.log(cmd);
         switch (cmd.op) {
         case 'number':
             forth.stack.push(cmd.value);
+            ip++;
             break;
         case 'call':
             cmd.value.run();
+            ip++;
             break;
+        case 'goto':
+            ip = cmd.value;
+            break;
+        case 'goto-on-false': {
+            var val = forth.stack.pop();
+            forth.checkType(val, 'boolean');
+            if (!val)
+                ip = cmd.value;
+            else
+                ip++;
+            break;
+        }
         default:
-            throw 'bug: bad opcode';
+            throw 'bug: bad opcode '+cmd.op;
         }
     }
 };
@@ -187,6 +201,20 @@ forth.checkType = function(val, type) {
 // Dictionary of words (as functions to execute)
 forth.dict = {};
 
+forth.compileUntil = function(endTokens, code) {
+    for (;;) {
+        var token = forth.source.readToken();
+        if (token == null)
+            throw endTokens.join('/')+' expected';
+
+        for (var i = 0; i < endTokens.length; i++)
+            if (token == endTokens[i])
+                return token;
+
+        forth.compileToken(token, code);
+    }
+};
+
 forth.dict[':'] = {
     run: function() {
         var name = forth.source.readToken();
@@ -195,11 +223,7 @@ forth.dict[':'] = {
 
         var code = [];
         var token;
-        while ((token = forth.source.readToken()) != ';') {
-            if (token == null)
-                throw '; expected';
-            forth.compileToken(token, code);
-        }
+        forth.compileUntil([';'], code);
 
         var word = new forth.CodeWord(code);
         forth.dict[name] = word;
@@ -207,6 +231,26 @@ forth.dict[':'] = {
 
     compile: function() {
         throw ': unavailable in compile mode';
+    }
+};
+
+forth.dict['if'] = {
+    run: function() {
+        throw '"if" unavailable in run mode';
+    },
+    compile: function(code) {
+        var goto = {op: 'goto-on-false'};
+        code.push(goto);
+        if (forth.compileUntil(['then', 'else'], code) == 'then') {
+            goto.value = code.length;
+        } else {
+            var goto2 = {op: 'goto'};
+            code.push(goto2);
+            goto.value = code.length;
+            forth.compileUntil(['then'], code);
+            goto2.value = code.length;
+        }
+
     }
 };
 
