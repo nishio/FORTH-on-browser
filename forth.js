@@ -21,8 +21,8 @@ forth.Parser.prototype = {
         return result;
     },
 
-    // Read a word (delimited by spaces)
-    readWord: function() {
+    // Read a token (delimited by spaces)
+    readToken: function() {
         // drop all spaces
         this.readWhile(/\s/);
 
@@ -41,7 +41,7 @@ forth.Parser.prototype = {
     readAll: function() {
         var codes = [];
         var c;
-        while((c = this.readWord()) != null)
+        while((c = this.readToken()) != null)
             codes.push(c);
         if (!this.empty())
             throw 'parse error';
@@ -49,33 +49,33 @@ forth.Parser.prototype = {
     }
 };
 
-// Parse input, returning Forth words
+// Parse input, returning Forth tokens
 forth.parse = function(s) {
     return new forth.Parser(s).readAll();
 };
 
-// Format a list of words
-forth.printWords = function(words) {
-    return words.join(' ');
+// Format a list of tokens
+forth.printTokens = function(tokens) {
+    return tokens.join(' ');
 };
 
-// Execute a word
-forth.runWord = function(word) {
-    if (typeof word == 'number') // a number literal
-        forth.stack.push(word);
-    else if (word in forth.dict)
-        forth.dict[word]();
+// Execute a token
+forth.runToken = function(token) {
+    if (typeof token == 'number') // a number literal
+        forth.stack.push(token);
+    else if (token in forth.dict)
+        forth.dict[token]();
     else
-        throw 'unknown word: '+word;
+        throw 'unknown word: '+token;
 };
 
-forth.compileWord = function(word, code) {
-    if (typeof word == 'number')
-        code.push({op: 'number', value: word});
-    else if (word in forth.dict)
-        code.push({op: 'call', value: forth.dict[word]});
+forth.compileToken = function(token, code) {
+    if (typeof token == 'number')
+        code.push({op: 'number', value: token});
+    else if (token in forth.dict)
+        code.push({op: 'call', value: forth.dict[token]});
     else
-        throw 'unknown word: '+word;
+        throw 'unknown word: '+token;
 };
 
 forth.runCode = function(code) {
@@ -98,10 +98,10 @@ forth.runCode = function(code) {
 forth.runString = function(s) {
     forth.source = new forth.Parser(s);
     for (;;) {
-        var word = forth.source.readWord();
-        if (word == null)
+        var token = forth.source.readToken();
+        if (token == null)
             break;
-        forth.runWord(word);
+        forth.runToken(token);
     }
 };
 
@@ -162,16 +162,16 @@ forth.checkType = function(val, type) {
 forth.dict = {};
 
 forth.dict[':'] = function() {
-    var name = forth.source.readWord();
+    var name = forth.source.readToken();
     if (typeof name != 'string')
         throw 'a name expected';
 
     var code = [];
-    var word;
-    while ((word = forth.source.readWord()) != ';') {
-        if (word == null)
+    var token;
+    while ((token = forth.source.readToken()) != ';') {
+        if (token == null)
             throw '; expected';
-        forth.compileWord(word, code);
+        forth.compileToken(token, code);
     }
 
     var func = function() {

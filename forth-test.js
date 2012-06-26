@@ -17,7 +17,7 @@ forth.assertExec = function(code, result) {
 forth.test = function() {
     forth.terminal.echo('Running tests...');
     try {
-        forth.assertEqual(forth.printWords(forth.parse(' A b c  d ')),
+        forth.assertEqual(forth.printTokens(forth.parse(' A b c  d ')),
                           'a b c d');
 
         forth.assertExec('2 3', '[2, 3]');
