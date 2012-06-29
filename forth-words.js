@@ -111,10 +111,10 @@ forth.dict['if'] = {
     }
 };
 
-forth.dict['repeat'] = {
-    name: 'repeat',
+forth.dict['begin'] = {
+    name: 'begin',
     run: function() {
-        throw '"repeat" unavailable in run mode';
+        throw '"begin" unavailable in run mode';
     },
     compile: function(code) {
         var dest = code.length;
