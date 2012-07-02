@@ -93,7 +93,6 @@ forth.dbg.init = function(prefix) {
 forth.dbg.redraw = function() {
     var src = forth.source.input;
     src = src.replace(/\s+/g, ' ');
-    console.log(src);
     if (src.length > 40)
         src = src.substr(0, 40)+'...';
     forth.dbg.elt('source').text(src);
