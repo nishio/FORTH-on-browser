@@ -121,7 +121,10 @@ forth.stepCode = function(ip, code, word, goInside) {
         break;
     }
     case 'recurse':
-        word.run();
+        if (goInside)
+            word.initContext();
+        else
+            word.run();
         ip++;
         break;
     default:
