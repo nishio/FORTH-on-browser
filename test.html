@@ -20,6 +20,7 @@
           forth.test();
           $('body').click(function() { forth.terminal.disable(); });
           $('#clear').click(function () { forth.terminal.clear(); });
+          forth.debuggerInterface('#debug-');
     });
   </script>
   <style>
@@ -58,6 +59,13 @@
     #tabs textarea {
         font-family: monospace;
         font-size: 12px;
+    }
+    #debug-source {
+        border: 1px solid black;
+        font-family: monospace;
+        font-size: 12px;
+        height: 1.2em;
+        margin: 10px;
     }
   </style>
 </head>
@@ -101,7 +109,10 @@ x @ . ( or: x fetch )
         </div>
       </div> <!-- source-tab -->
       <div id="debugger-tab">
-        ...
+        <input type="checkbox" id="debug-mode" value="debug-mode" /> Debug mode<br>
+        Source:
+        <div id="debug-source"></div>
+        <input type="button" id="debug-step" value="Step" disabled="disabled" />
       </div> <!-- debugger-tab -->
     </div> <!-- tabs -->
 <body>

@@ -6,10 +6,15 @@ forth.interface = function(terminal, stack) {
     terminal.terminal(
         function(str, terminal) {
             try {
-                forth.runString(str);
+                if (forth.dbg.enabled) {
+                    forth.feedString(str);
+                    terminal.echo('Input loaded into debugger');
+                } else
+                    forth.runString(str);
             } catch(err) {
                 terminal.error(err);
             }
+            forth.redrawDebugger();
             forth.redrawStack();
         },
         {
@@ -27,8 +32,15 @@ forth.sourceLoader = function(source, button) {
         function() {
             forth.terminal.echo('Loading source...');
             try {
-                forth.runString(source.val());
-                forth.terminal.echo('Source loaded');
+                if (forth.dbg.enabled) {
+                    forth.feedString(source.val());
+                    forth.terminal.echo('Source loaded into debugger');
+                } else {
+                    forth.runString(source.val());
+                    forth.terminal.echo('Source loaded');
+                }
+                forth.redrawDebugger();
+                forth.redrawStack();
             } catch(err) {
                 console.log(err);
                 forth.terminal.error(err);
@@ -43,4 +55,44 @@ forth.redrawStack = function() {
         var elt = $('<div class="stackElt">'+val+'</div>');
         forth.stackElt.append(elt);
     }
+};
+
+forth.debuggerInterface = function(prefix) {
+    forth.dbg = {
+        enabled: false,
+        elt: function(sel) {
+            return $(prefix+sel);
+        }
+    };
+
+    forth.dbg.elt('mode').change(
+        function() {
+            var enabled = forth.dbg.elt('mode').attr('checked') == 'checked';
+            forth.dbg.enabled = enabled;
+            forth.redrawDebugger();
+            forth.terminal.echo('Debugger is ' +
+                                (enabled ? 'enabled' : 'disabled'));
+        });
+    forth.dbg.elt('step').click(
+        function() {
+            try {
+                forth.step();
+            } catch(err) {
+                terminal.error(err);
+            }
+            forth.redrawDebugger();
+            forth.redrawStack();
+        });
+};
+
+forth.redrawDebugger = function() {
+    var src = forth.source.input;
+    src = src.replace(/\s+/g, ' ');
+    console.log(src);
+    if (src.length > 40)
+        src = src.substr(0, 40)+'...';
+    forth.dbg.elt('source').text(src);
+    forth.dbg.elt('step').attr(
+        'disabled',
+        !(forth.dbg.enabled && forth.running));
 };
