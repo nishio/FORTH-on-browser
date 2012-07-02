@@ -171,6 +171,7 @@ forth.Context.prototype = {
 forth.feedString = function(s) {
     forth.source = new forth.Parser(s);
     forth.reset();
+    forth.dbg.clearContexts();
     forth.running = true;
 };
 

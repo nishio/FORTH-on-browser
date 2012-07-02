@@ -122,12 +122,19 @@ forth.dbg.pushContext = function(number, name, code) {
                    '<span class="op">'+cmd.op+'</span>'+
                    '<span class="value">'+v+'</span></div>'));
     }
+    c.hide();
     forth.dbg.elt('call-stack').prepend(c);
+    c.slideDown();
     return c;
 };
 
 forth.dbg.popContext = function() {
-    forth.dbg.elt('call-stack').find('.context:first').remove();
+    forth.dbg.elt('call-stack').find('.context:first').slideUp(
+        function() { $(this).remove(); });
+};
+
+forth.dbg.clearContexts = function() {
+    forth.dbg.elt('call-stack').find('.context').remove();
 };
 
 forth.dbg.setIp = function(c, ip) {
