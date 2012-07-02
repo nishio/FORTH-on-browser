@@ -42,7 +42,7 @@ forth.CodeWord = function(name, code) {
 forth.CodeWord.prototype = {
     run: function() {
         forth.callStack.push(this);
-        forth.runCode(this.code);
+        forth.runCode(this.code, this);
         forth.callStack.pop();
     },
     compile: forth.genericWord.compile

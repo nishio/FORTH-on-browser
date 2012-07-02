@@ -82,7 +82,8 @@ forth.compileToken = function(token, code) {
         throw 'unknown word: '+token;
 };
 
-forth.runCode = function(code) {
+// Run compiled code; word is the word we're in
+forth.runCode = function(code, word) {
     var ip = 0;
     while (ip < code.length) {
         var cmd = code[ip];
@@ -109,7 +110,7 @@ forth.runCode = function(code) {
             break;
         }
         case 'recurse':
-            forth.callStack[forth.callStack.length-1].run();
+            word.run();
             ip++;
             break;
         default:
