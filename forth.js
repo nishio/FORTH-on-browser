@@ -85,37 +85,74 @@ forth.compileToken = function(token, code) {
 // Run compiled code; word is the word we're in
 forth.runCode = function(code, word) {
     var ip = 0;
-    while (ip < code.length) {
-        var cmd = code[ip];
-        switch (cmd.op) {
-        case 'number':
-        case 'addr': // variable 'address', a string
-            forth.stack.push(cmd.value);
-            ip++;
-            break;
-        case 'call':
-            cmd.value.run();
-            ip++;
-            break;
-        case 'goto':
+    while (ip < code.length)
+        ip = forth.stepCode(ip, code, word);
+};
+
+// Perform one step of execution, return new IP
+forth.stepCode = function(ip, code, word) {
+    var cmd = code[ip];
+
+    switch (cmd.op) {
+    case 'number':
+    case 'addr': // variable 'address', a string
+        forth.stack.push(cmd.value);
+        ip++;
+        break;
+    case 'call':
+        cmd.value.run();
+        ip++;
+        break;
+    case 'goto':
+        ip = cmd.value;
+        break;
+    case 'goto-on-false': {
+        var val = forth.stack.pop();
+        forth.checkType(val, 'boolean');
+        if (!val)
             ip = cmd.value;
-            break;
-        case 'goto-on-false': {
-            var val = forth.stack.pop();
-            forth.checkType(val, 'boolean');
-            if (!val)
-                ip = cmd.value;
-            else
-                ip++;
-            break;
-        }
-        case 'recurse':
-            word.run();
+        else
             ip++;
-            break;
-        default:
-            throw 'bug: bad opcode '+cmd.op;
+        break;
+    }
+    case 'recurse':
+        word.run();
+        ip++;
+        break;
+    default:
+        throw 'bug: bad opcode '+cmd.op;
+    }
+
+    return ip;
+};
+
+// Context represents a chunk of code that is currently being stepped through,
+// stored in forth.contexts and displayed in the visual debugger
+forth.Context = function(word, code) {
+    this.word = word;
+    this.code = code;
+    this.ip = 0;
+};
+forth.Context.prototype = {
+    init: function() {
+        forth.contexts.push(this);
+        forth.stackTrace.push(this.word.name);
+    },
+    step: function() {
+        if (forth.contexts[forth.contexts.length-1] != this)
+            throw 'bug: step() on a non-topmost context';
+
+        if (this.ip < this.code.length) {
+            this.ip = forth.stepCode(this.ip, this.code, this.word);
+            forth.terminal.echo(this.word.name+' ip='+this.ip);
+        } else {
+            this.end();
         }
+    },
+    end: function() {
+        forth.stackTrace.pop();
+        forth.contexts.pop();
+        forth.terminal.echo(this.word.name+' exiting');
     }
 };
 
@@ -133,13 +170,27 @@ forth.runString = function(s) {
 };
 
 forth.step = function(s) {
-    var token = forth.source.readToken();
-    if (token == null) {
-        forth.running = false;
-        return;
-    }
     try {
-        forth.runToken(token);
+        if (forth.contexts.length > 0) {
+            forth.contexts[forth.contexts.length-1].step();
+        } else {
+            var token = forth.source.readToken();
+            if (token == null) {
+                forth.running = false;
+                return;
+            }
+
+            if (forth.dbg && forth.dbg.enabled) {
+                if (token in forth.dict &&
+                    forth.dict[token].initContext) {
+
+                    forth.dict[token].initContext();
+                    return;
+                }
+            }
+
+            forth.runToken(token);
+        }
     } catch (err) {
         forth.running = false;
         for (var i = forth.stackTrace.length-1;
@@ -196,8 +247,12 @@ forth.stackTrace = [];
 // loop executes while i < n
 forth.loopStack = [];
 
+// Execution context - list of Context objects
+forth.contexts = [];
+
 // Reset the execution state
 forth.reset = function() {
     forth.stackTrace = [];
     forth.loopStack = [];
+    forth.contexts = [];
 };

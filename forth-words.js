@@ -45,7 +45,12 @@ forth.CodeWord.prototype = {
         forth.runCode(this.code, this);
         forth.stackTrace.pop();
     },
-    compile: forth.genericWord.compile
+    compile: forth.genericWord.compile,
+
+    // Create a Context for this word and add it to forth.contexts
+    initContext: function() {
+        new forth.Context(this, this.code).init();
+    }
 };
 
 forth.checkType = function(val, type) {
