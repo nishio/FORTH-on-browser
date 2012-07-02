@@ -86,11 +86,13 @@ forth.compileToken = function(token, code) {
 forth.runCode = function(code, word) {
     var ip = 0;
     while (ip < code.length)
-        ip = forth.stepCode(ip, code, word);
+        ip = forth.stepCode(ip, code, word, false);
 };
 
 // Perform one step of execution, return new IP
-forth.stepCode = function(ip, code, word) {
+// goInside - create a Context on a 'call' opcode
+//  (if we call a word that supports initContext())
+forth.stepCode = function(ip, code, word, goInside) {
     var cmd = code[ip];
 
     switch (cmd.op) {
@@ -100,7 +102,10 @@ forth.stepCode = function(ip, code, word) {
         ip++;
         break;
     case 'call':
-        cmd.value.run();
+        if (goInside && cmd.value.initContext)
+            cmd.value.initContext();
+        else
+            cmd.value.run();
         ip++;
         break;
     case 'goto':
@@ -138,12 +143,12 @@ forth.Context.prototype = {
         forth.contexts.push(this);
         forth.stackTrace.push(this.word.name);
     },
-    step: function() {
+    step: function(goInside) {
         if (forth.contexts[forth.contexts.length-1] != this)
             throw 'bug: step() on a non-topmost context';
 
         if (this.ip < this.code.length) {
-            this.ip = forth.stepCode(this.ip, this.code, this.word);
+            this.ip = forth.stepCode(this.ip, this.code, this.word, goInside);
             forth.terminal.echo(this.word.name+' ip='+this.ip);
         } else {
             this.end();
@@ -166,13 +171,16 @@ forth.feedString = function(s) {
 forth.runString = function(s) {
     forth.feedString(s);
     while (forth.running)
-        forth.step();
+        forth.step(false);
 };
 
-forth.step = function(s) {
+// Perform a top-level step of execution (read a current word, or execute one
+// command if we're inside a word).
+// If goInside is true, step inside a word if we can
+forth.step = function(goInside) {
     try {
         if (forth.contexts.length > 0) {
-            forth.contexts[forth.contexts.length-1].step();
+            forth.contexts[forth.contexts.length-1].step(goInside);
         } else {
             var token = forth.source.readToken();
             if (token == null) {
@@ -180,7 +188,7 @@ forth.step = function(s) {
                 return;
             }
 
-            if (forth.dbg && forth.dbg.enabled) {
+            if (goInside) {
                 if (token in forth.dict &&
                     forth.dict[token].initContext) {
 

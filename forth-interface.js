@@ -73,16 +73,17 @@ forth.debuggerInterface = function(prefix) {
             forth.terminal.echo('Debugger is ' +
                                 (enabled ? 'enabled' : 'disabled'));
         });
-    forth.dbg.elt('step').click(
-        function() {
-            try {
-                forth.step();
-            } catch(err) {
-                terminal.error(err);
-            }
-            forth.redrawDebugger();
-            forth.redrawStack();
-        });
+    var step = function(goInside) {
+        try {
+                forth.step(goInside);
+        } catch(err) {
+            terminal.error(err);
+        }
+        forth.redrawDebugger();
+        forth.redrawStack();
+    };
+    forth.dbg.elt('step-inside').click(function() { step(true); });
+    forth.dbg.elt('step-over').click( function() { step(false); });
 };
 
 forth.redrawDebugger = function() {
@@ -92,7 +93,6 @@ forth.redrawDebugger = function() {
     if (src.length > 40)
         src = src.substr(0, 40)+'...';
     forth.dbg.elt('source').text(src);
-    forth.dbg.elt('step').attr(
-        'disabled',
-        !(forth.dbg.enabled && forth.running));
+    forth.dbg.elt('step-inside').attr('disabled', !(forth.dbg.enabled && forth.running));
+    forth.dbg.elt('step-over').attr('disabled', !(forth.dbg.enabled && forth.running));
 };
