@@ -68,15 +68,6 @@ forth.dbg = {
 forth.dbg.init = function(prefix) {
     forth.dbg.prefix = prefix;
 
-    forth.dbg.elt('mode').change(
-        function() {
-            var enabled = forth.dbg.elt('mode').attr('checked') == 'checked';
-            forth.dbg.enabled = enabled;
-            forth.dbg.redraw();
-            forth.terminal.echo('Debugger is ' +
-                                (enabled ? 'enabled' : 'disabled'));
-            forth.terminal.set_prompt(enabled ? 'debug> ' : '> ');
-        });
     var step = function(goInside) {
         try {
             forth.step(goInside);
@@ -86,8 +77,26 @@ forth.dbg.init = function(prefix) {
         forth.dbg.redraw();
         forth.redrawStack();
     };
+
+    var run = function() {
+        while (forth.running)
+            step(false);
+        forth.dbg.redraw();
+    };
+
+    forth.dbg.elt('mode').change(
+        function() {
+            var enabled = forth.dbg.elt('mode').attr('checked') == 'checked';
+            forth.dbg.enabled = enabled;
+            forth.dbg.redraw();
+            forth.terminal.echo('Debugger is ' +
+                                (enabled ? 'enabled' : 'disabled'));
+            forth.terminal.set_prompt(enabled ? 'debug> ' : '> ');
+        });
+
     forth.dbg.elt('step-inside').click(function() { step(true); });
     forth.dbg.elt('step-over').click( function() { step(false); });
+    forth.dbg.elt('run').click(run);
 };
 
 forth.dbg.redraw = function() {
@@ -96,8 +105,11 @@ forth.dbg.redraw = function() {
     if (src.length > 40)
         src = src.substr(0, 40)+'...';
     forth.dbg.elt('source').text(src);
-    forth.dbg.elt('step-inside').attr('disabled', !(forth.dbg.enabled && forth.running));
-    forth.dbg.elt('step-over').attr('disabled', !(forth.dbg.enabled && forth.running));
+
+    var allDisabled = !(forth.dbg.enabled && forth.running);
+    forth.dbg.elt('run').attr('disabled', allDisabled);
+    forth.dbg.elt('step-inside').attr('disabled', allDisabled);
+    forth.dbg.elt('step-over').attr('disabled', allDisabled);
 };
 
 forth.dbg.pushContext = function(number, name, code) {
