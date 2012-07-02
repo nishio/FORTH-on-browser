@@ -14,7 +14,7 @@ forth.interface = function(terminal, stack) {
             } catch(err) {
                 terminal.error(err);
             }
-            forth.redrawDebugger();
+            forth.dbg.redraw();
             forth.redrawStack();
         },
         {
@@ -39,7 +39,7 @@ forth.sourceLoader = function(source, button) {
                     forth.runString(source.val());
                     forth.terminal.echo('Source loaded');
                 }
-                forth.redrawDebugger();
+                forth.dbg.redraw();
                 forth.redrawStack();
             } catch(err) {
                 console.log(err);
@@ -57,37 +57,40 @@ forth.redrawStack = function() {
     }
 };
 
-forth.debuggerInterface = function(prefix) {
-    forth.dbg = {
-        enabled: false,
-        elt: function(sel) {
-            return $(prefix+sel);
-        }
-    };
+// Visual debugger interface
+forth.dbg = {
+    enabled: false,
+    elt: function(sel) {
+        return $(this.prefix+sel);
+    }
+};
+
+forth.dbg.init = function(prefix) {
+    forth.dbg.prefix = prefix;
 
     forth.dbg.elt('mode').change(
         function() {
             var enabled = forth.dbg.elt('mode').attr('checked') == 'checked';
             forth.dbg.enabled = enabled;
-            forth.redrawDebugger();
+            forth.dbg.redraw();
             forth.terminal.echo('Debugger is ' +
                                 (enabled ? 'enabled' : 'disabled'));
             forth.terminal.set_prompt(enabled ? 'debug> ' : '> ');
         });
     var step = function(goInside) {
         try {
-                forth.step(goInside);
+            forth.step(goInside);
         } catch(err) {
             terminal.error(err);
         }
-        forth.redrawDebugger();
+        forth.dbg.redraw();
         forth.redrawStack();
     };
     forth.dbg.elt('step-inside').click(function() { step(true); });
     forth.dbg.elt('step-over').click( function() { step(false); });
 };
 
-forth.redrawDebugger = function() {
+forth.dbg.redraw = function() {
     var src = forth.source.input;
     src = src.replace(/\s+/g, ' ');
     console.log(src);
