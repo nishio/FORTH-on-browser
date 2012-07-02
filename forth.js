@@ -145,6 +145,9 @@ forth.Context.prototype = {
     init: function() {
         forth.contexts.push(this);
         forth.stackTrace.push(this.word.name);
+        this.elt = forth.dbg.pushContext(forth.contexts.length,
+                                         this.word.name, this.code);
+        forth.dbg.setIp(this.elt, this.ip);
     },
     step: function(goInside) {
         if (forth.contexts[forth.contexts.length-1] != this)
@@ -152,7 +155,7 @@ forth.Context.prototype = {
 
         if (this.ip < this.code.length) {
             this.ip = forth.stepCode(this.ip, this.code, this.word, goInside);
-            forth.terminal.echo(this.word.name+' ip='+this.ip);
+            forth.dbg.setIp(this.elt, this.ip);
         } else {
             this.end();
         }
@@ -160,7 +163,7 @@ forth.Context.prototype = {
     end: function() {
         forth.stackTrace.pop();
         forth.contexts.pop();
-        forth.terminal.echo(this.word.name+' exiting');
+        forth.dbg.popContext();
     }
 };
 

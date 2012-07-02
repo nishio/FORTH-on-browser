@@ -67,6 +67,30 @@
         height: 1.2em;
         margin: 10px;
     }
+    .context {
+        border: 1px solid black;
+        margin: 5px;
+        padding: 2px;
+    }
+    .context .name { font-weight: bold; }
+    .context .command .number {
+        display: inline-block;
+        width: 3em;
+        text-align: right;
+    }
+    .context .command .op {
+        display: inline-block;
+        width: 10em;
+        text-align: right;
+    }
+    .context .command.active {
+        background: #ccc;
+    }
+    .context .command .value {
+        font-family: monospace;
+        font-size: 12px;
+        padding-left: 2em;
+    }
   </style>
 </head>
     <div id="term"></div>

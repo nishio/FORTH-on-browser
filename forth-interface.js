@@ -99,3 +99,38 @@ forth.dbg.redraw = function() {
     forth.dbg.elt('step-inside').attr('disabled', !(forth.dbg.enabled && forth.running));
     forth.dbg.elt('step-over').attr('disabled', !(forth.dbg.enabled && forth.running));
 };
+
+forth.dbg.pushContext = function(number, name, code) {
+    var c = $('<div class="context">'+
+              '<div class="name">#'+number+': '+name+
+              '</div></div>');
+    for (var i = 0; i < code.length; ++i) {
+        var cmd = code[i];
+        var v;
+        switch(cmd.op) {
+        case 'call':
+            v = cmd.value.name;
+            break;
+        case 'recurse':
+            v = '';
+            break;
+        default:
+            v = cmd.value;
+            break;
+        }
+        c.append($('<div class="command"><span class="number">'+i+'</span> '+
+                   '<span class="op">'+cmd.op+'</span>'+
+                   '<span class="value">'+v+'</span></div>'));
+    }
+    forth.dbg.elt('call-stack').prepend(c);
+    return c;
+};
+
+forth.dbg.popContext = function() {
+    forth.dbg.elt('call-stack').find('.context:first').remove();
+};
+
+forth.dbg.setIp = function(c, ip) {
+    c.find('.command.active').removeClass('active');
+    $(c.find('.command')[ip]).addClass('active');
+};
