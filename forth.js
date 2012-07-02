@@ -118,18 +118,30 @@ forth.runCode = function(code) {
     }
 };
 
-forth.runString = function(s) {
+// Load a string to the interpreter and initialize it.
+forth.feedString = function(s) {
     forth.source = new forth.Parser(s);
     forth.reset();
+    forth.running = true;
+};
+
+forth.runString = function(s) {
+    forth.feedString(s);
+    while (forth.running)
+        forth.step();
+};
+
+forth.step = function(s) {
+    var token = forth.source.readToken();
+    if (token == null) {
+        forth.running = false;
+        return;
+    }
     try {
-        for (;;) {
-            var token = forth.source.readToken();
-            if (token == null)
-                break;
-            forth.runToken(token);
-        }
+        forth.runToken(token);
     } catch (err) {
-        while (forth.callStack.length > 0)
+        forth.running = false;
+        for (var i = 0; i < forth.callStack.length; i++)
             err += '\nin '+forth.callStack.pop().name;
         throw err;
     }
