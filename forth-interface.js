@@ -134,6 +134,9 @@ forth.dbg.pushContext = function(number, name, code) {
                    '<span class="op">'+cmd.op+'</span>'+
                    '<span class="value">'+v+'</span></div>'));
     }
+    // last, "empty" command
+    c.append('<div class="command"><span class="number">'+i+'</span>'+
+             '<span class="op">(end)</span><span class="value"></span></div>');
     c.hide();
     forth.dbg.elt('call-stack').prepend(c);
     c.slideDown();
