@@ -72,6 +72,7 @@ forth.debuggerInterface = function(prefix) {
             forth.redrawDebugger();
             forth.terminal.echo('Debugger is ' +
                                 (enabled ? 'enabled' : 'disabled'));
+            forth.terminal.set_prompt(enabled ? 'debug> ' : '> ');
         });
     var step = function(goInside) {
         try {
