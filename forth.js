@@ -142,8 +142,10 @@ forth.step = function(s) {
         forth.runToken(token);
     } catch (err) {
         forth.running = false;
-        for (var i = 0; i < forth.callStack.length; i++)
-            err += '\nin '+forth.callStack.pop().name;
+        for (var i = forth.stackTrace.length-1;
+             i >= 0;
+             i--)
+            err += '\nin '+forth.stackTrace[i];
         throw err;
     }
 };
@@ -187,8 +189,8 @@ forth.variables = {};
 // Words
 forth.dict = {};
 
-// Call stack, for now a list of word objects
-forth.callStack = [];
+// Stack trace - a list of strings
+forth.stackTrace = [];
 
 // Loop control stack. Contains objects {i, n}; the
 // loop executes while i < n
@@ -196,6 +198,6 @@ forth.loopStack = [];
 
 // Reset the execution state
 forth.reset = function() {
-    forth.callStack = [];
+    forth.stackTrace = [];
     forth.loopStack = [];
 };

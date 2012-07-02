@@ -17,7 +17,7 @@ forth.StandardWord = function(name, types, func) {
 };
 forth.StandardWord.prototype = {
     run: function() {
-        forth.callStack.push(this);
+        forth.stackTrace.push(this.name);
 
         var args = forth.stack.popList(this.types.length);
 
@@ -30,7 +30,7 @@ forth.StandardWord.prototype = {
         var result = this.func.apply(null, args);
         forth.stack.pushList(result);
 
-        forth.callStack.pop();
+        forth.stackTrace.pop();
     },
     compile: forth.genericWord.compile
 };
@@ -41,9 +41,9 @@ forth.CodeWord = function(name, code) {
 };
 forth.CodeWord.prototype = {
     run: function() {
-        forth.callStack.push(this);
+        forth.stackTrace.push(this.name);
         forth.runCode(this.code, this);
-        forth.callStack.pop();
+        forth.stackTrace.pop();
     },
     compile: forth.genericWord.compile
 };
