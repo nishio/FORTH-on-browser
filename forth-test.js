@@ -14,6 +14,11 @@ forth.assertExec = function(code, result) {
     forth.stack.reset();
 };
 
+// Compile and test code (not only execute)
+forth.assertExecC = function(code, result) {
+    forth.assertExec(': a '+code+' ; a', result);
+};
+
 forth.test = function() {
     forth.terminal.echo('Running tests...');
     try {
@@ -42,33 +47,32 @@ forth.test = function() {
 
         forth.assertExec(': a 2 2 + ;', '[]');
         forth.assertExec('a', '[4]');
-        delete forth.dict['a'];
 
-        forth.assertExec(': a true if 1 else 0 then ; a', '[1]');
-        forth.assertExec(': a false if 1 else 0 then ; a', '[0]');
-        delete forth.dict['a'];
+        forth.assertExecC('true if 1 else 0 then', '[1]');
+        forth.assertExecC('false if 1 else 0 then', '[0]');
 
-        forth.assertExec(': a true if 1 then ; a', '[1]');
-        forth.assertExec(': a false if 1 then ; a', '[]');
-        delete forth.dict['a'];
+        forth.assertExecC('true if 1 then', '[1]');
+        forth.assertExecC('false if 1 then', '[]');
 
-        forth.assertExec(': a 2 begin 2 * dup 100 > until ; a', '[128]');
-        delete forth.dict['a'];
+        forth.assertExecC('2 begin 2 * dup 100 > until', '[128]');
 
-        forth.assertExec('1 2 ( + ) -', '[-1]');
-        forth.assertExec(': a 1 2 ( + ) - ; a', '[-1]');
-        delete forth.dict['a'];
+        forth.assertExec(
+            '1 2 ( + ) -', '[-1]');
+        forth.assertExecC(
+            '1 2 ( + ) -', '[-1]');
 
         // recursion
         forth.assertExec(': a 1 - dup 0 > if a then ; 10 a', '[0]');
         forth.assertExec(': a 1 - dup 0 > if recurse then ; 10 a', '[0]');
-        delete forth.dict['a'];
 
         forth.assertExec('variable x 2 x ! x @', '[2]');
+
+        // Cleanup
+        forth.stack.reset();
+        delete forth.dict['a'];
         delete forth.dict['x'];
         delete forth.variables['x'];
 
-        forth.stack.reset();
         forth.terminal.echo('All tests OK!');
     } catch (err) {
         forth.terminal.error('test: '+err);
