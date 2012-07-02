@@ -120,7 +120,7 @@ forth.runCode = function(code) {
 
 forth.runString = function(s) {
     forth.source = new forth.Parser(s);
-    forth.callStack = [];
+    forth.reset();
     try {
         for (;;) {
             var token = forth.source.readToken();
@@ -173,3 +173,16 @@ forth.variables = {};
 
 // Words
 forth.dict = {};
+
+// Call stack, for now a list of word objects
+forth.callStack = [];
+
+// Loop control stack. Contains objects {i, n}; the
+// loop executes while i < n
+forth.loopStack = [];
+
+// Reset the execution state
+forth.reset = function() {
+    forth.callStack = [];
+    forth.loopStack = [];
+};

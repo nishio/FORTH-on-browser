@@ -123,6 +123,21 @@ forth.dict['begin'] = {
     }
 };
 
+forth.dict['do'] = {
+    name: 'do',
+    run: function() {
+        throw '"do" unavailable in run mode';
+    },
+    compile: function(code) {
+        // We call helper functions to manage the loop stack
+        forth.compileToken('loop-start', code);
+        var dest = code.length;
+        forth.compileUntil(['loop'], code);
+        forth.compileToken('loop-end', code);
+        code.push({op: 'goto-on-false', value: dest});
+    }
+};
+
 forth.dict['('] = {
     name: '(',
     readComment: function() {
@@ -321,3 +336,53 @@ forth.dict['@'] = new forth.StandardWord(
     });
 forth.dict['fetch'] = forth.dict['@'];
 
+// Loop control
+
+forth.dict['i'] = new forth.StandardWord(
+    'i',
+    [],
+    function() {
+        var st = forth.loopStack;
+        if (st.length == 0)
+            throw 'empty loop stack';
+        return [st[st.length-1].i];
+    });
+
+forth.dict['j'] = new forth.StandardWord(
+    'j',
+    [],
+    function() {
+        var st = forth.loopStack;
+        if (st.length < 2)
+            throw 'too short loop stack';
+        return [st[st.length-2].i];
+    });
+
+forth.dict['loop-start'] = new forth.StandardWord(
+    'loop-start',
+    ['number', 'number'],
+    function(n, i) {
+        forth.loopStack.push({i: i, n: n});
+        return [];
+    }
+);
+
+// loop-end returns true if we finished the loop, false
+// otherwise (to be consumed by goto-on-false)
+forth.dict['loop-end'] = new forth.StandardWord(
+    'loop-end',
+    [],
+    function(n, i) {
+        var st = forth.loopStack;
+        if (st.length == 0)
+            throw 'empty loop stack';
+        var record = st[st.length-1];
+        record.i++;
+        if (record.i < record.n) {
+            return [false];
+        } else {
+            st.pop();
+            return [true];
+        }
+    }
+);

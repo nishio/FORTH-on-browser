@@ -67,6 +67,14 @@ forth.test = function() {
 
         forth.assertExec('variable x 2 x ! x @', '[2]');
 
+        forth.assertExecC('0 10 0 do i + loop', '[45]');
+        forth.assertExecC('0 '
+                          + '10 0 do '
+                          + ' 10 0 do '
+                          + '  i j * + '
+                          + ' loop '
+                          + 'loop', '[2025]');
+
         // Cleanup
         forth.stack.reset();
         delete forth.dict['a'];
