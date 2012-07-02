@@ -81,7 +81,7 @@ forth.dbg.init = function(prefix) {
         try {
             forth.step(goInside);
         } catch(err) {
-            terminal.error(err);
+            forth.terminal.error(err);
         }
         forth.dbg.redraw();
         forth.redrawStack();
