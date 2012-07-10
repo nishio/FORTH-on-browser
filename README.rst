@@ -2,6 +2,7 @@
  FORTH on browser
 ==================
 
+.. demo
 
 TODO
 ====
