@@ -1,0 +1,67 @@
+#term {
+    float: left;
+    width: 42%;
+    height: 350px;
+}
+#stack-container {
+    text-align: center;
+    float: left;
+    width: 12%;
+    height: 300px;
+}
+#tabs {
+    float: right;
+    width: 42%;
+}
+#source {
+    width: 100%;
+    height: 280px;
+}
+.stackElt {
+    width: 100%;
+    height: 1.3em;
+    border: 1px solid black;
+    margin: 0.2em;
+    vertical-align: middle;
+}
+#tabs {
+    font-family: Times, serif;
+    font-size: 1em;
+}
+#tabs .ui-tabs-panel { padding: 0.2em; }
+#tabs .ui-tabs-nav li a { padding: 0.2em 0.6em; }
+#tabs textarea {
+    font-family: monospace;
+    font-size: 12px;
+}
+#debug-source {
+    border: 1px solid black;
+    font-family: monospace;
+    font-size: 12px;
+    height: 1.2em;
+    margin: 10px;
+}
+.context {
+    border: 1px solid black;
+    margin: 5px;
+    padding: 2px;
+}
+.context .name { font-weight: bold; }
+.context .command .number {
+    display: inline-block;
+    width: 3em;
+    text-align: right;
+}
+.context .command .op {
+    display: inline-block;
+    width: 10em;
+    text-align: right;
+}
+.context .command.active {
+    background: #ccc;
+}
+.context .command .value {
+    font-family: monospace;
+    font-size: 12px;
+    padding-left: 2em;
+}
