@@ -61,3 +61,13 @@ HISTORY
     - being able to display and step over execution (this is probably a big one)
 
 
+License
+=======
+
+GPLv3 (c) NISHIO Hirokazu 2012
+
+
+Thanks
+======
+
+Paweł Marczewski contributed much to the project.
