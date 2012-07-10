@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FORTH Interpreter</title>
+  <script src="jquery-1.7.2.min.js"></script>
+  <script src="jquery.terminal-0.4.15.js"></script>
+  <script src="forth.js"></script>
+  <script src="forth-words.js"></script>
+  <script src="forth-interface.js"></script>
+  <script src="forth-test.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="terminal.css" />
+  <link rel="stylesheet" type="text/css"
+        href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/base/jquery-ui.css">
+  <script>
+    $(function() {
+          $('#tabs').tabs();
+          forth.interface($('#term'), $('#stack'));
+          forth.sourceLoader($('#source'), $('#load'));
+          forth.test();
+          $('body').click(function() { forth.terminal.disable(); });
+          $('#clear').click(function () { forth.terminal.clear(); });
+          forth.dbg.init('#debug-');
+    });
+  </script>
+  <style>
+    #term {
+        float: left;
+        width: 42%;
+        height: 350px;
+    }
+    #stack-container {
+        text-align: center;
+        float: left;
+        width: 12%;
+        height: 300px;
+    }
+    #tabs {
+        float: right;
+        width: 42%;
+    }
+    #source {
+        width: 100%;
+        height: 280px;
+    }
+    .stackElt {
+        width: 100%;
+        height: 1.3em;
+        border: 1px solid black;
+        margin: 0.2em;
+        vertical-align: middle;
+    }
+    #tabs {
+        font-family: Times, serif;
+        font-size: 1em;
+    }
+    #tabs .ui-tabs-panel { padding: 0.2em; }
+    #tabs .ui-tabs-nav li a { padding: 0.2em 0.6em; }
+    #tabs textarea {
+        font-family: monospace;
+        font-size: 12px;
+    }
+    #debug-source {
+        border: 1px solid black;
+        font-family: monospace;
+        font-size: 12px;
+        height: 1.2em;
+        margin: 10px;
+    }
+    .context {
+        border: 1px solid black;
+        margin: 5px;
+        padding: 2px;
+    }
+    .context .name { font-weight: bold; }
+    .context .command .number {
+        display: inline-block;
+        width: 3em;
+        text-align: right;
+    }
+    .context .command .op {
+        display: inline-block;
+        width: 10em;
+        text-align: right;
+    }
+    .context .command.active {
+        background: #ccc;
+    }
+    .context .command .value {
+        font-family: monospace;
+        font-size: 12px;
+        padding-left: 2em;
+    }
+  </style>
+</head>
+    <div id="term"></div>
+    <div id="stack-container">
+      <b>Stack</b><br/>
+      <div id="stack"></div>
+    </div>
+    <div id="tabs">
+      <ul>
+        <li><a href="#source-tab">Source</a></li>
+        <li><a href="#debugger-tab">Debugger</a></li>
+      </ul>
+      <div id="source-tab">
+        <textarea id="source">
+( Type Forth code here )
+
+: square ( n -- n^2 ) dup * ;
+
+: fact ( n -- n! )
+  dup 0 = if
+    drop 1
+  else
+    dup 1 - fact
+    *
+  then
+;
+
+5 fact .
+
+( Variables )
+
+variable x
+
+42 x ! ( or: x store )
+x @ . ( or: x fetch )
+</textarea>
+        <div id="source-buttons">
+          <input type="button" id="clear" value="Clear terminal" />
+          <input type="button" id="load" value="Load source" />
+        </div>
+      </div> <!-- source-tab -->
+      <div id="debugger-tab">
+        <input type="checkbox" id="debug-mode" value="debug-mode" />
+        <label for="debug-mode">Debug mode</label><br>
+        Source:
+        <div id="debug-source"></div>
+        <input type="button" id="debug-run" value="Run" disabled="disabled" />
+        <input type="button" id="debug-step-inside" value="Step Inside" disabled="disabled" />
+        <input type="button" id="debug-step-over" value="Step Over" disabled="disabled" />
+        <br>
+        Call stack:
+        <div id="debug-call-stack"></div>
+      </div> <!-- debugger-tab -->
+    </div> <!-- tabs -->
+<body>
+</body>
+</html>
