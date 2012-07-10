@@ -1,0 +1,21 @@
+( Type Forth code here )
+
+: square ( n -- n^2 ) dup * ;
+
+: fact ( n -- n! )
+  dup 0 = if
+    drop 1
+  else
+    dup 1 - fact
+    *
+  then
+;
+
+5 fact .
+
+( Variables )
+
+variable x
+
+42 x ! ( or: x store )
+x @ . ( or: x fetch )

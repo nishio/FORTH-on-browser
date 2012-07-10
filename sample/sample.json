@@ -1,0 +1,1 @@
+[{"code": "( Type Forth code here )\n\n: square ( n -- n^2 ) dup * ;\n\n: fact ( n -- n! )\n  dup 0 = if\n    drop 1\n  else\n    dup 1 - fact\n    *\n  then\n;\n\n5 fact .\n\n( Variables )\n\nvariable x\n\n42 x ! ( or: x store )\nx @ . ( or: x fetch )\n", "name": "default"}]
