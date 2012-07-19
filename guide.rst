@@ -39,6 +39,21 @@ With that machinery in hand, we can easily implement several other
 standard Forth words, such as printing (``.``) and stack manipulation
 words (``drop``, ``swap``, ``dup``, etc.)
 
+Code
+----
+
+`Parser function
+<https://github.com/nishio/FORTH-on-browser/commit/b0e3904e23162dd46ef181755c201bceaf4684b1>`_
+
+`Interpreter with arithmetics
+<https://github.com/nishio/FORTH-on-browser/commit/b0e3904e23162dd46ef181755c201bceaf4684b1>`_
+
+`Printing word ('.')
+<https://github.com/nishio/FORTH-on-browser/commit/0e1fe64fa27ee6a5303747dc1604c8032f178cd5>`_
+
+`Stack manipulation words
+<https://github.com/nishio/FORTH-on-browser/commit/43266f6d55e39e4f8291a0e9756632f8eebb975d>`_
+
 Comparison and booleans
 =======================
 
@@ -56,6 +71,18 @@ signatures to all words, but allow for any type in some cases: ::
 
     forth.dict['drop'] =
        forth.standardWord(['any'], function(a) { return []; });
+
+Code
+----
+
+`Type checking
+<https://github.com/nishio/FORTH-on-browser/commit/3cef21d9278cabe88d4a39f8106c933da2dff568>`_
+
+`Booleans and boolean words
+<https://github.com/nishio/FORTH-on-browser/commit/3cef21d9278cabe88d4a39f8106c933da2dff568>`_
+
+`Number comparison
+<https://github.com/nishio/FORTH-on-browser/commit/fadc300a2ba7f7ad2860f8c2b0afb3a859eef433>`_
 
 Compilation
 ===========
@@ -85,6 +112,13 @@ so ``:`` is a word that has special behaviour in the run mode. It
 reads and compiles code until ``;``, compiles it to machine code, and
 creates a new word.
 
+Code
+----
+
+
+`Simple virtual machine, and user-defined words (':')
+<https://github.com/nishio/FORTH-on-browser/commit/23d89587428d057f36aed21d5796cfb6501d19f5>`_
+
 Conditionals
 ============
 
@@ -107,6 +141,15 @@ some ``goto`` instructions where necessary.
 
 Later we implement ``do..until`` (a loop) in the same way.
 
+Code
+----
+
+`Conditional ('if..else..then')
+<https://github.com/nishio/FORTH-on-browser/commit/5604ccb79d9abcd0d74b716f717200ee4b654c79>`_
+
+`Loop ('repeat..until', later renamed to 'do..until')
+<https://github.com/nishio/FORTH-on-browser/commit/3d8bc0ef372369b70cda3df8225b754b99890277>`_
+
 Other Forth features
 ====================
 
@@ -121,6 +164,21 @@ We add several other language features:
   special ``recurse`` machine opcode
 
 The implementations should be easy to understand.
+
+Code
+----
+
+`Comments ('(')
+<https://github.com/nishio/FORTH-on-browser/commit/c6d643e9d42859b70b2b375e0a67e8194b6f3f66>`_
+
+`Variables ('variable', '@', '!')
+<https://github.com/nishio/FORTH-on-browser/commit/b4ed7cae5c7c7733d848444179732148b018ca2c>`_
+
+`Indexed loops ('do..loop')
+<https://github.com/nishio/FORTH-on-browser/commit/d42de21c2ade63cb3cf496259e008916c576dd91>`_
+
+`Recursion (by 'recurse', and by word name)
+<https://github.com/nishio/FORTH-on-browser/commit/c051a5ac1953cc062015d5b29b4ddb4b9ae611cf>`_
 
 Debugger
 ========
@@ -138,3 +196,12 @@ or add it as a ``Context`` and execute it step-by-step.
 
 Of course, we can only step through user-defined words, i.e. the ones
 implemented in Forth, not JavaScript.
+
+Code
+----
+
+`'Context' objects
+<https://github.com/nishio/FORTH-on-browser/commit/409b0888add1ba836ed6b232118ef4e4d549ff28>`_
+
+`Stepping over and inside procedures
+<https://github.com/nishio/FORTH-on-browser/commit/55070705d3ea69256e9d7c57f3027e39eb79d0ed>`_
