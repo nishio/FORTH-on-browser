@@ -2,7 +2,7 @@
 Forth on browser - code guide
 =============================
 
-This is a guide describing the development of a Lisp interpreter. It
+This is a guide describing the development of a Forth interpreter. It
 does not mention all details, but highlights the most important
 milestones.
 
@@ -20,12 +20,13 @@ number on the data stack. A *word* is a procedure that removes some
 values from the stack as arguments, and pushes some as results.
 
 For now, the parser (``forth.parse``) simply splits the code and
-converts the number tokens (i.e. tokens matching ``/^-?\d+$/``) to
+converts the number literals (i.e. tokens matching ``/^-?\d+$/``) to
 JavaScript numbers, leaving the rest a strings.
 
 The data stack is implemented by the ``forth.stack`` object. While the
 stack itself is a simple array, we write some helper functions
-(``push``, ``pushList``, ``pop``, etc.) that report errors.
+(``push``, ``pushList``, ``pop``, etc.) that report errors (throw an
+exception) in case of stack underflow.
 
 We implement four standard words: ``+``, ``-``, ``*``, ``/``. They all
 take two arguments and return one result. A helper function
@@ -35,9 +36,16 @@ result as an array of values to be pushed: ::
 
     forth.dict['+'] = forth.standardWord(2, function(a, b) { return [a+b]; });
 
-With that machinery in hand, we can easily implement several other
-standard Forth words, such as printing (``.``) and stack manipulation
-words (``drop``, ``swap``, ``dup``, etc.)
+We return an array, not a single value, because some words will leave
+more than one value on the stack. For example, the word ``swap`` (swap
+two topmost values on the stack) looks like this: ::
+
+    forth.dict['swap'] = forth.standardWord(2, function(a, b) { return [b, a]; });
+
+With the ``standardWord`` function, we can easily implement several
+other standard Forth words, such as printing (``.``) and stack
+manipulation words (``swap`` mentioned earlier, ``drop``, ``dup``,
+``rot``, etc.)
 
 Code
 ----
@@ -46,7 +54,7 @@ Code
 <https://github.com/nishio/FORTH-on-browser/commit/b0e3904e23162dd46ef181755c201bceaf4684b1>`_
 
 `Interpreter with arithmetics
-<https://github.com/nishio/FORTH-on-browser/commit/b0e3904e23162dd46ef181755c201bceaf4684b1>`_
+<https://github.com/nishio/FORTH-on-browser/blob/569aea0512cb18c82dba9ca9231d8a8ea4ae978a/forth.js>`_
 
 `Printing word ('.')
 <https://github.com/nishio/FORTH-on-browser/commit/0e1fe64fa27ee6a5303747dc1604c8032f178cd5>`_
@@ -58,7 +66,7 @@ Comparison and booleans
 =======================
 
 We make a departure from the original Forth: instead of using integers
-and true and false, we use a separate boolean type. Because we're
+as true and false, we use a separate boolean type. Because we're
 implementing the interpreter in a high-level language anyway, this is
 easy to do and helpful for the user. Because ``if`` will always expect
 a boolean, it will be easier to find bugs.
@@ -89,20 +97,27 @@ Compilation
 
 So far, all Forth code has been interpreted (executed
 token-by-token). Now, we will add another layer: a compiler. The words
-will be compiled as instructions of a simple virtual machine, so that
-``2 2 +`` becomes a list of commands: ::
+will be compiled as instructions of a simple virtual machine.
+
+There are several reasons for that:
+
+- We want to show how a Forth compiler might look like, with compile
+  mode / run mode distinction.
+- Stack-based virtual machines are used by implementations of several
+  modern languages, such as Java, Python and Ruby, so it's helpful to
+  study one.
+- We'll be able to easily implement control structures like
+  ``if..else..end``.
+- We will use the machine code to write a step-by-step debugger.
+
+To show a simple example, the code ``2 2 +`` will be compiled to the
+following list of commands: ::
 
     0: number 2
     1: number 2
     2: call +
 
-There are several reasons for that. Mostly, we want to show how a
-Forth compiler might look like, with compile mode / run mode
-distinction. This will also allow us to easily implement control
-structures like ``if..else..end``. We will also use the machine code
-to write a step-by-step debugger.
-
-We now have two modes of processing each token:
+To do that, we now have two modes of processing each token:
 
 - *run mode*, in which we simply execute it (push a number, run the procedure),
 - *compile mode*, in which the token is translated to machine code.
@@ -114,7 +129,6 @@ creates a new word.
 
 Code
 ----
-
 
 `Simple virtual machine, and user-defined words (':')
 <https://github.com/nishio/FORTH-on-browser/commit/23d89587428d057f36aed21d5796cfb6501d19f5>`_
@@ -161,7 +175,7 @@ We add several other language features:
 - indexed loops: ``0 0 10 do i + loop`` sums the numbers from 0 to 9,
   ``i`` inside the loop returns the loop index
 - recursion: to call the function within itself, we implement a
-  special ``recurse`` machine opcode
+  special ``recurse`` command in the virtual machine
 
 The implementations should be easy to understand.
 
